@@ -2,14 +2,24 @@
 from math import *
 import numpy as np
 
-import quadsieve2 as qs
+import quadsieve as qs
 
 
 def solve(n):
     fact_mat,factors,to_square=qs.quad_sieve(n)
+    factors=np.array(factors)
     to_square=np.array(to_square)
+    print(fact_mat)
+    print(factors)
+    print(to_square)
+
+    print("fact_mat shape:",fact_mat.shape,"factors.shape:",
+          factors.shape,"to_square.shape:",to_square.shape)
     parsed = np.mod(fact_mat, 2 * np.ones(fact_mat.shape)).astype('bool')
     transform, reduced = row_echelon(parsed)
+
+    print("reduced:,",np.asarray(reduced,dtype="int32"))
+    print("transform:", np.array(transform,dtype="int32"))
 
     null_row_inds=[]
     for idx, row in enumerate(reduced):
@@ -18,11 +28,15 @@ def solve(n):
 
     for x in null_row_inds:
         null_row = transform[x]
+        print("null_row:",np.array(null_row,dtype="int32"))
         val=get_factor(null_row,to_square,fact_mat,factors,n)
         if val>1 and val<n:
             return val,n/val
 
     return None
+
+def factors_to_num(factors,exps):
+    return np.prod(np.power(factors,exps))
 
 def check_null(row):
     for x in row:
@@ -122,8 +136,7 @@ def gcd(a,b):
     else: return gcd(a,b%a)
 
 if __name__ == '__main__':
-    print(solve(97*733))
-    print(97*733)
+    print(solve(23*11))
     '''
     mat1=np.array([[1,0,1,1],
                    [0,1,0,1],

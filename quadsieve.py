@@ -108,10 +108,10 @@ def quad_sieve(n):
     countr = 0
     row_titles = []
     for index in indices:
-        factors = {key : False for key in new_B}
+        factors = {key : 0 for key in new_B}
         row_title = valsc[index]
         if row_title != 0:
-            print("Creating a new row: %d" % row_title)
+            #print("Creating a new row: %d" % row_title)
             row_titles.append(row_title)
             new_row = [int(factors[x]) for x in sorted(factor(row_title,new_B,factors))]
             factor_matrix[countr] = new_row
@@ -129,7 +129,7 @@ def factor(n,new_B,factors):
     B = new_B[-1]
     toFactor = n
     if toFactor in new_B:
-        factors[toFactor] = not factors[toFactor]
+        factors[toFactor] += 1
         #print("Found factor! Switching %d" % toFactor)
         return factors
 
@@ -137,7 +137,7 @@ def factor(n,new_B,factors):
     if nontrivial_factor > 0:
         #print(nontrivial_factor)
         if nontrivial_factor in new_B:
-            factors[nontrivial_factor] = not factors[nontrivial_factor]
+            factors[nontrivial_factor] += 1
             #print("Found factor! Switching %d" % nontrivial_factor)
             factors = factor(n//nontrivial_factor,new_B,factors)
             return factors
@@ -226,9 +226,5 @@ def isqrt(n):
         y = (x + n // x) // 2
     return x
 
-if __name__ == '__main__':
-    print(quad_sieve(97*67))
-
-
-# print(quad_sieve(74981))
+#print(quad_sieve(74981))
 

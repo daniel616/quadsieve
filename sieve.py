@@ -2,28 +2,57 @@
 from math import *
 import numpy as np
 
-import quadsieve as qs
+import quadsieve2 as qs
 
 
 def solve(n):
     fact_mat,factors,to_square=qs.quad_sieve(n)
-    print(factors)
-    print(to_square)
-    print(fact_mat)
+    to_square=np.array(to_square)
     parsed = np.mod(fact_mat, 2 * np.ones(fact_mat.shape)).astype('bool')
-
     transform, reduced = row_echelon(parsed)
 
-    #print(transform)
-    #print(reduced)
+    null_row_inds=[]
+    for idx, row in enumerate(reduced):
+        if check_null(row):
+            null_row_inds.append(idx)
 
-    null_row = transform[transform.shape[0] - 1]
+    for x in null_row_inds:
+        null_row = transform[x]
+        val=get_factor(null_row,to_square,fact_mat,factors,n)
+        if val>1 and val<n:
+            return val,n/val
 
-    s_exps = np.matmul(null_row, fact_mat)
+    return None
+
+def check_null(row):
+    for x in row:
+        if x!=0: return False
+    return True
 
 
-def get_factor(null_row,fact_mat,factors,to_square,n):
-    pass
+def get_factor(null_row,to_square,fact_mat,factors,n):
+    assert null_row.shape==to_square.shape
+
+    exps=np.matmul(null_row,fact_mat)
+
+    for idx, x in np.ndenumerate(exps):
+        assert x%2==0
+
+    exps=exps/2
+    powers=np.power(factors,exps)%n
+
+    sqrt_val=np.prod(powers)%n
+
+    orig_val=1
+    for idx, x in np.ndenumerate(null_row):
+        if x==1:
+            orig_val=(orig_val*to_square[idx])%n
+
+    print("orig val:",orig_val,"sqrt_val:",sqrt_val,"\n")
+
+    ret= gcd(orig_val-sqrt_val,n)
+    print(ret)
+    return ret
 
 #Input: 2d np boolean array. Treated as Z/2Z. Returns reduced row echelon form of array, and matrix of transformations
 #used to obtain this form.
@@ -51,6 +80,7 @@ def row_echelon(mat):
     return mir, mat
 
 #Multiplies matrices over Z/2Z. Regular matmul doesn't work because + is not xor.
+#debugging purposes only.
 def matmul2(a,b):
     c_rows=[]
     for i in range(a.shape[0]):
@@ -83,6 +113,8 @@ def switch_row(mat, r1,r2,mirror=None):
         switch_row(mirror,r1,r2)
 
 def gcd(a,b):
+    if a<0:a=-a
+    if b<0:b=-b
     if a==0: return b
     if b==0: return a
 
@@ -90,7 +122,8 @@ def gcd(a,b):
     else: return gcd(a,b%a)
 
 if __name__ == '__main__':
-    solve(101*67)
+    print(solve(97*733))
+    print(97*733)
     '''
     mat1=np.array([[1,0,1,1],
                    [0,1,0,1],

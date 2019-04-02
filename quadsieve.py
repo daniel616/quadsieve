@@ -34,12 +34,13 @@ def quad_sieve(n):
     s = isqrt(n) + 1 #low x bound
     B = gen_primes(m.ceil((1/2.2)*m.exp(m.sqrt(m.log(n)*m.log(m.log(n)))))) #formula for most efficient B
     upx = m.ceil(m.exp((2/2.2)*m.sqrt(m.log(n)*m.log(m.log(n))))) #formula for upper x bound
-    vals = [x**2 - n for x in range(s, s + upx)] #generates list of x^2 - n values
+    xrng = list(range(s, s + upx))
+    vals = [x**2 - n for x in xrng] #generates list of x^2 - n values
     valsc = vals.copy() #copy of x^2 - n values, once you have indices of B-smooth numbers you can recover the number
     indices = [] #indices of B-smooth numbers in vals, valsc
     new_B = [] #discard primes in B that aren't squares mod n
     factor_found = 0 #b-smooth numbers found
-    
+    print('hi')
     #discard non squares p mod n
     for p in B:
         if p == 2:
@@ -111,7 +112,7 @@ def quad_sieve(n):
         factors = {key : 0 for key in new_B}
         row_title = valsc[index]
         if row_title != 0:
-            #print("Creating a new row: %d" % row_title)
+            print("Creating a new row: %d" % row_title)
             row_titles.append(row_title)
             new_row = [int(factors[x]) for x in sorted(factor(row_title,new_B,factors))]
             factor_matrix[countr] = new_row
@@ -120,7 +121,7 @@ def quad_sieve(n):
     # print(len(new_B))
     # print(factor_found)
 
-    return (factor_matrix,new_B,row_titles)
+    return (factor_matrix,new_B,row_titles,[xrng[indexex] for indexex in indices])
 
 def factor(n,new_B,factors):
     if factors==-1:
@@ -154,7 +155,7 @@ def pollard_rho(n):
     for c in range(1,6):
         if n % 2 == 0:
             return n//2        
-        #print("finding nontrival factor of %d" % n)
+        print("finding nontrival factor of %d" % n)
         x,y,d=2,2,1
         while d==1:
             x=g(x,c,n)
@@ -226,5 +227,4 @@ def isqrt(n):
         y = (x + n // x) // 2
     return x
 
-#print(quad_sieve(74981))
 

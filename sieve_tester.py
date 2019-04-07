@@ -8,5 +8,6 @@ def gcd_test():
     assert gcd(-5,5)==5
     assert gcd( 144,56)==8
 
+
 if __name__ == "__main__":
     gcd_test()

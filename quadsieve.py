@@ -8,6 +8,7 @@ This is a temporary script file.
 
 import math as m
 import numpy as num
+from tqdm import tqdm
 
 def gen_primes(n):
     #generates primes up to n using sieve of eratosthenes
@@ -31,16 +32,17 @@ def gen_primes(n):
     return primes
 
 def quad_sieve(n):
+    print("starting quad sieve")
     s = isqrt(n) + 1 #low x bound
     B = gen_primes(m.ceil((1/2.2)*m.exp(m.sqrt(m.log(n)*m.log(m.log(n)))))) #formula for most efficient B
-    upx = m.ceil(m.exp((2/2.2)*m.sqrt(m.log(n)*m.log(m.log(n))))) #formula for upper x bound
+    upx = m.ceil(m.exp(((2/2.2)*m.sqrt(m.log(n)*m.log(m.log(n)))))) #formula for upper x bound
+    print("hi")
     xrng = list(range(s, s + upx))
     vals = [x**2 - n for x in xrng] #generates list of x^2 - n values
     valsc = vals.copy() #copy of x^2 - n values, once you have indices of B-smooth numbers you can recover the number
-    indices = [] #indices of B-smooth numbers in vals, valsc
+    indices = set() #indices of B-smooth numbers in vals, valsc
     new_B = [] #discard primes in B that aren't squares mod n
-    factor_found = 0 #b-smooth numbers found
-    print('hi')
+
     #discard non squares p mod n
     for p in B:
         if p == 2:
@@ -48,12 +50,11 @@ def quad_sieve(n):
         else:
             if (legendre_symbol(n, p) == 1):
                 new_B.append(p)
-    
     #returned matrix will have 1 more factor than there are primes in new_B to gurantee a linear dependency
     factor_matrix = num.zeros((len(new_B) + 1, len(new_B)), dtype=int)
     
     #performs sieve of eratosthenes on x^2 - n sequence for primes in new_B
-    for p in new_B:
+    for p in tqdm(new_B):
         #special case when p = 2, find first x such that x^2 - n divisible by 2 then every other x after will be divisible by 2
         if p == 2:
             i = 0;
@@ -67,9 +68,9 @@ def quad_sieve(n):
                     vals[j] //= 2
                 
                 if(vals[j] == 1):
-                    factor_found += 1
+                    indices.add(j)
                     #break if enough b-smooth numbers are found
-                    if (factor_found == len(new_B) + 1):
+                    if (len(indices) == len(new_B) + 1):
                         break
         else:
             #solve x^2 = n mod p, two values a1 and a2
@@ -89,21 +90,18 @@ def quad_sieve(n):
                     
                     #every b-smooth number will equal 1
                     if(vals[j] == 1):
-                        factor_found += 1
-                        if (factor_found == len(new_B) + 1):
+                        indices.add(j)
+                        if (len(indices) == len(new_B) + 1):
                             break
                 
-                if (factor_found == len(new_B) + 1):
+                if (len(indices) == len(new_B) + 1):
                     break
         
-        if (factor_found == len(new_B) + 1):
+        if (len(indices) == len(new_B) + 1):
             break;
-    
-    #find indices in vals where vals[i] == 1, so vals[i] is b-smooth
-    for i in range(len(vals)):
-        if (vals[i] == 1):
-            indices.append(i)
 
+    print(len(indices))
+    print(len(new_B))
 
     # print(new_B)
     countr = 0
@@ -112,7 +110,7 @@ def quad_sieve(n):
         factors = {key : 0 for key in new_B}
         row_title = valsc[index]
         if row_title != 0:
-            print("Creating a new row: %d" % row_title)
+            #print("Creating a new row: %d" % row_title)
             row_titles.append(row_title)
             new_row = [int(factors[x]) for x in sorted(factor(row_title,new_B,factors))]
             factor_matrix[countr] = new_row
@@ -120,7 +118,8 @@ def quad_sieve(n):
     # print(factor_matrix)
     # print(len(new_B))
     # print(factor_found)
-
+    
+    print(len(factor_matrix[0]))
     return (factor_matrix,new_B,row_titles,[xrng[indexex] for indexex in indices])
 
 def factor(n,new_B,factors):
@@ -147,7 +146,7 @@ def factor(n,new_B,factors):
             factors = factor(n//nontrivial_factor,new_B,factors)
 
     else:  
-        #print("pollard_rho couldn't factor %d" % n)
+        print("pollard_rho couldn't factor %d" % n)
         return -1
     return factors
 
@@ -155,7 +154,7 @@ def pollard_rho(n):
     for c in range(1,6):
         if n % 2 == 0:
             return n//2        
-        print("finding nontrival factor of %d" % n)
+        #print("finding nontrival factor of %d" % n)
         x,y,d=2,2,1
         while d==1:
             x=g(x,c,n)

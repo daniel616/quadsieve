@@ -1,14 +1,22 @@
 
-from math import *
+import math
 import numpy as np
 
 import quadsieve as qs
 
-
+#This code factors n from start to finish.
 def solve(n):
+    #breakpoint()
     fact_mat,factors,row_labels,row_labels_unsquared=qs.quad_sieve(n)
-    factors=np.array(factors)
-    to_square=np.array(row_labels_unsquared)
+
+    row_labels=np.array(row_labels,dtype="int32")
+    row_labels_unsquared=np.array(row_labels_unsquared,dtype="int32")
+    factors=np.array(factors,dtype="int32")
+    to_square=np.array(row_labels_unsquared,dtype="int32")
+    print("fact_mat.shape",fact_mat.shape)
+    print("row_labels shape", row_labels.shape)
+    print("factors shape", factors.shape)
+    print("row_labels_unsquared shape", to_square.shape)
 
     parsed = np.mod(fact_mat, 2 * np.ones(fact_mat.shape)).astype('bool')
     transform, reduced = row_echelon(parsed)
@@ -22,20 +30,30 @@ def solve(n):
         null_row = transform[x]
         val=get_factor(null_row,to_square,fact_mat,factors,n)
         if val>1 and val<n:
-            return val,n/val
+            return val,int(n/val)
+
 
     return None
 
-def factors_to_num(factors,exps):
-    return np.prod(np.power(factors,exps))
+#Takes an array of factors and exponents and as input.
+#Returns product of factors raised to exponents mod n.
+def factors_to_num(factors,exps, n):
+    ret = 1
+    for idx,_ in enumerate(factors):
+        power=pow(int(factors[idx]),int(exps[idx]),n)
+        ret= (ret * power)%n
+    return ret
 
+#Returns true iff all elements of row are 0.
 def check_null(row):
     for x in row:
         if x!=0: return False
     return True
 
-
+#
 def get_factor(null_row,to_square,fact_mat,factors,n):
+    print(null_row.shape)
+    print(to_square.shape)
     assert null_row.shape==to_square.shape
 
     exps=np.matmul(null_row,fact_mat)
@@ -44,21 +62,24 @@ def get_factor(null_row,to_square,fact_mat,factors,n):
         assert x%2==0
 
     exps=exps/2
-    powers=np.power(factors,exps)%n
 
-    sqrt_val=np.prod(powers)%n
+    sqrt_val=factors_to_num(factors,exps,n)
 
     orig_val=1
     for idx, x in np.ndenumerate(null_row):
         if x==1:
             orig_val=(orig_val*to_square[idx])%n
 
-
-    ret= gcd(orig_val-sqrt_val,n)
+    print("orig_val:",orig_val,"sqrt_val:",sqrt_val)
+    orig_val,sqrt_val=int(orig_val),int(sqrt_val)
+    assert (orig_val**2)%n==(sqrt_val**2)%n
+    ret= math.gcd(orig_val-sqrt_val,n)
     print(ret)
     return ret
 
-#Input: 2d np boolean array. Treated as Z/2Z. Returns reduced row echelon form of array, and matrix of transformations
+
+#Input: 2d np boolean array. Treated as Z/2Z. Returns reduced row echelon form of array, and matrix of row
+#transformations
 #used to obtain this form.
 def row_echelon(mat):
     orig=mat
@@ -116,16 +137,9 @@ def switch_row(mat, r1,r2,mirror=None):
         assert mirror.shape[0]==mat.shape[0]
         switch_row(mirror,r1,r2)
 
-def gcd(a,b):
-    if a<0:a=-a
-    if b<0:b=-b
-    if a==0: return b
-    if b==0: return a
-
-    if a>=b: return gcd(a%b,b)
-    else: return gcd(a,b%a)
-
 if __name__ == '__main__':
+    #print(solve(101*61))
+    #print(solve(1000000007*1000000009))
     print(solve(16921456439215439701))
     '''
     mat1=np.array([[1,0,1,1],

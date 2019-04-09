@@ -3,6 +3,7 @@ import math
 import numpy as np
 
 import factormatrix as qs
+import time
 
 import sys
 
@@ -126,7 +127,10 @@ def switch_row(mat, r1,r2,mirror=None):
 
 if __name__ == '__main__':
     if len(sys.argv)>1:
-    	print("Factors: {0}".format(solve(int(sys.argv[1]))))
+        start=time.time()
+        print("Factors: {0}".format(solve(int(sys.argv[1]))))
+        end=time.time()
+        print("Elapsed time: {0}s".format(end-start))
     else:
     	print("Usage: python3 sieve.py <n>")
    

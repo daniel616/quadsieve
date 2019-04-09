@@ -8,7 +8,7 @@ This is a temporary script file.
 
 import math as m
 import numpy as num
-from tqdm import tqdm
+
 
 def gen_primes(n):
     #generates primes up to n using sieve of eratosthenes
@@ -32,13 +32,12 @@ def gen_primes(n):
     return primes
 
 def quad_sieve(n):
-    print("starting quad sieve")
+    print("Finding factor base...")
     s = isqrt(n) + 1 #low x bound
     B = gen_primes(m.ceil((1/2)*m.exp(m.sqrt(m.log(n)*m.log(m.log(n)))))) #formula for most efficient B
     upx = m.ceil(m.exp(((2/2)*m.sqrt(m.log(n)*m.log(m.log(n)))))) #formula for upper x bound
-    print("hi")
     xrng = list(range(s, s + upx))
-    vals = [x**2 - n for x in xrng] #generates list of x^2 - n values
+    vals = [x**2 % n for x in xrng] #generates list of x^2 - n values
     valsc = vals.copy() #copy of x^2 - n values, once you have indices of B-smooth numbers you can recover the number
     indices = set() #indices of B-smooth numbers in vals, valsc
     new_B = [] #discard primes in B that aren't squares mod n
@@ -54,7 +53,7 @@ def quad_sieve(n):
     factor_matrix = num.zeros((len(new_B) + 1, len(new_B)), dtype=int)
     
     #performs sieve of eratosthenes on x^2 - n sequence for primes in new_B
-    for p in tqdm(new_B):
+    for p in new_B:
         #special case when p = 2, find first x such that x^2 - n divisible by 2 then every other x after will be divisible by 2
         if p == 2:
             i = 0;
@@ -100,8 +99,7 @@ def quad_sieve(n):
         if (len(indices) == len(new_B) + 1):
             break;
 
-    print(len(indices))
-    print(len(new_B))
+
 
     # print(new_B)
     countr = 0
@@ -119,7 +117,7 @@ def quad_sieve(n):
     # print(len(new_B))
     # print(factor_found)
     
-    print(len(factor_matrix[0]))
+    #print(len(factor_matrix[0]))
     return (factor_matrix,new_B,row_titles,[xrng[indexex] for indexex in indices])
 
 def factor(n,new_B,factors):

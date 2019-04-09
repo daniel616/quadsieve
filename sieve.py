@@ -4,20 +4,21 @@ import numpy as np
 
 import quadsieve as qs
 
+import sys
+
 #This code factors n from start to finish.
 def solve(n):
     #breakpoint()
     fact_mat,factors,row_labels,row_labels_unsquared=qs.quad_sieve(n)
 
     row_labels=np.array(row_labels,dtype="int64")
-    row_labels_unsquared=np.array(row_labels_unsquared,dtype="int64")
     factors=np.array(factors,dtype="int64")
     to_square=np.array(row_labels_unsquared,dtype="int64")
-    print("fact_mat.shape",fact_mat.shape)
-    print("row_labels shape", row_labels.shape)
-    print("factors shape", factors.shape)
-    print("row_labels_unsquared shape", to_square.shape)
-
+    #print("fact_mat.shape",fact_mat.shape)
+    #print("row_labels shape", row_labels.shape)
+    #print("factors shape", factors.shape)
+    #print("row_labels_unsquared shape", to_square.shape)
+    print("Finding linear dependencies...")
     parsed = np.mod(fact_mat, 2 * np.ones(fact_mat.shape)).astype('bool')
     transform, reduced = row_echelon(parsed)
 
@@ -25,10 +26,10 @@ def solve(n):
     for idx, row in enumerate(reduced):
         if check_null(row):
             null_row_inds.append(idx)
-
+    print("Checking linear dependencies...")
     for x in null_row_inds:
         null_row = transform[x]
-        val=get_factor(null_row,to_square,fact_mat,factors,n)
+        val=get_factor(null_row,row_labels_unsquared,fact_mat,factors,n)
         if val>1 and val<n:
             return val,int(n/val)
 
@@ -40,8 +41,9 @@ def solve(n):
 def factors_to_num(factors,exps, n):
     ret = 1
     for idx,_ in enumerate(factors):
-        power=pow(int(factors[idx]),int(exps[idx]),n)
-        ret= (ret * power)%n
+    	if int(exps[idx])!=0:
+	        power=pow(int(factors[idx]),int(exps[idx]),n)
+	        ret=(ret * power)%n
     return ret
 
 #Returns true iff all elements of row are 0.
@@ -52,9 +54,9 @@ def check_null(row):
 
 #
 def get_factor(null_row,to_square,fact_mat,factors,n):
-    print(null_row.shape)
-    print(to_square.shape)
-    assert null_row.shape==to_square.shape
+    #print(null_row.shape)
+    #print(to_square.shape)
+    #assert null_row.shape==to_square.shape
 
     exps=np.matmul(null_row,fact_mat)
 
@@ -67,14 +69,15 @@ def get_factor(null_row,to_square,fact_mat,factors,n):
 
     orig_val=1
     for idx, x in np.ndenumerate(null_row):
-        if x==1:
-            orig_val=(orig_val*to_square[idx])%n
+    	if x==1:
+        	orig_val=(orig_val*to_square[idx[0]])%n
 
-    print("orig_val:",orig_val,"sqrt_val:",sqrt_val)
+    #print("orig_val:",orig_val,"sqrt_val:",sqrt_val)
+    #sleep(0.5)
     orig_val,sqrt_val=int(orig_val),int(sqrt_val)
-    assert (orig_val**2)%n==(sqrt_val**2)%n
+    #assert (orig_val**2)%n==(sqrt_val**2)%n
     ret= math.gcd(orig_val-sqrt_val,n)
-    print(ret)
+    #print(ret, end = " ")
     return ret
 
 
@@ -138,18 +141,8 @@ def switch_row(mat, r1,r2,mirror=None):
         switch_row(mirror,r1,r2)
 
 if __name__ == '__main__':
-    #print(solve(101*61))
-    #print(solve(10_172_605_169))
-    print(solve(1000000007*1000000009))
-    #print(solve(16921456439215439701))
-    '''
-    mat1=np.array([[1,0,1,1],
-                   [0,1,0,1],
-                   [1,0,0,0],
-                   [1,1,0,0],
-                   [1,0,1,0]],dtype="bool")
-    print(mat1,"\n")
-    mir,red=row_echelon(mat1)
-    print(red,"\n")
-    print(mir)'''
-
+    if len(sys.argv)>1:
+    	print("Factors: {0}".format(solve(int(sys.argv[1]))))
+    else:
+    	print("Usage: python3 sieve.py <n>")
+   

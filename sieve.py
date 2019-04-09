@@ -2,7 +2,7 @@
 import math
 import numpy as np
 
-import quadsieve as qs
+import factormatrix as qs
 
 import sys
 
@@ -10,14 +10,7 @@ import sys
 def solve(n):
     #breakpoint()
     fact_mat,factors,row_labels,row_labels_unsquared=qs.quad_sieve(n)
-
-    row_labels=np.array(row_labels,dtype="int64")
     factors=np.array(factors,dtype="int64")
-    to_square=np.array(row_labels_unsquared,dtype="int64")
-    #print("fact_mat.shape",fact_mat.shape)
-    #print("row_labels shape", row_labels.shape)
-    #print("factors shape", factors.shape)
-    #print("row_labels_unsquared shape", to_square.shape)
     print("Finding linear dependencies...")
     parsed = np.mod(fact_mat, 2 * np.ones(fact_mat.shape)).astype('bool')
     transform, reduced = row_echelon(parsed)
@@ -54,8 +47,6 @@ def check_null(row):
 
 #
 def get_factor(null_row,to_square,fact_mat,factors,n):
-    #print(null_row.shape)
-    #print(to_square.shape)
     #assert null_row.shape==to_square.shape
 
     exps=np.matmul(null_row,fact_mat)
@@ -72,40 +63,33 @@ def get_factor(null_row,to_square,fact_mat,factors,n):
     	if x==1:
         	orig_val=(orig_val*to_square[idx[0]])%n
 
-    #print("orig_val:",orig_val,"sqrt_val:",sqrt_val)
-    #sleep(0.5)
     orig_val,sqrt_val=int(orig_val),int(sqrt_val)
     #assert (orig_val**2)%n==(sqrt_val**2)%n
     ret= math.gcd(orig_val-sqrt_val,n)
-    #print(ret, end = " ")
+
     return ret
 
 
 #Input: 2d np boolean array. Treated as Z/2Z. Returns reduced row echelon form of array, and matrix of row
-#transformations
-#used to obtain this form.
+#transformations used to obtain this reduced row echelon form.
 def row_echelon(mat):
     orig=mat
     mat=np.array(mat,copy=True)
-
-    mir=np.identity(mat.shape[0],dtype="bool")
+    trans=np.identity(mat.shape[0],dtype="bool")
     nrows,ncols=mat.shape[0],mat.shape[1]
-
 
     r_base=0
     for j in range(ncols):
         if r_base==nrows: break
         for i in range(r_base,nrows):
             if mat[i][j]==True:
-                switch_row(mat,i,r_base,mirror=mir)
-                clear_pivot(mat,r_base,j,mirror=mir)
+                switch_row(mat,i,r_base,mirror=trans)
+                clear_pivot(mat,r_base,j,mirror=trans)
                 r_base+=1
                 break
 
-    #print(matmul2(mir,orig),"product\n")
-    #print(mat,"final\n")
-    assert np.array_equal(matmul2(mir,orig),mat)
-    return mir, mat
+    #assert np.array_equal(matmul2(mir,orig),mat)
+    return trans, mat
 
 #Multiplies matrices over Z/2Z. Regular matmul doesn't work because + is not xor.
 #debugging purposes only.

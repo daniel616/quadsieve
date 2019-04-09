@@ -9,10 +9,10 @@ def solve(n):
     #breakpoint()
     fact_mat,factors,row_labels,row_labels_unsquared=qs.quad_sieve(n)
 
-    row_labels=np.array(row_labels,dtype="int32")
-    row_labels_unsquared=np.array(row_labels_unsquared,dtype="int32")
-    factors=np.array(factors,dtype="int32")
-    to_square=np.array(row_labels_unsquared,dtype="int32")
+    row_labels=np.array(row_labels,dtype="int64")
+    row_labels_unsquared=np.array(row_labels_unsquared,dtype="int64")
+    factors=np.array(factors,dtype="int64")
+    to_square=np.array(row_labels_unsquared,dtype="int64")
     print("fact_mat.shape",fact_mat.shape)
     print("row_labels shape", row_labels.shape)
     print("factors shape", factors.shape)
@@ -139,8 +139,9 @@ def switch_row(mat, r1,r2,mirror=None):
 
 if __name__ == '__main__':
     #print(solve(101*61))
-    #print(solve(1000000007*1000000009))
-    print(solve(16921456439215439701))
+    #print(solve(10_172_605_169))
+    print(solve(1000000007*1000000009))
+    #print(solve(16921456439215439701))
     '''
     mat1=np.array([[1,0,1,1],
                    [0,1,0,1],

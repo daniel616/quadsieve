@@ -34,8 +34,8 @@ def gen_primes(n):
 def quad_sieve(n):
     print("starting quad sieve")
     s = isqrt(n) + 1 #low x bound
-    B = gen_primes(m.ceil((1/2.2)*m.exp(m.sqrt(m.log(n)*m.log(m.log(n)))))) #formula for most efficient B
-    upx = m.ceil(m.exp(((2/2.2)*m.sqrt(m.log(n)*m.log(m.log(n)))))) #formula for upper x bound
+    B = gen_primes(m.ceil((1/2)*m.exp(m.sqrt(m.log(n)*m.log(m.log(n)))))) #formula for most efficient B
+    upx = m.ceil(m.exp(((2/2)*m.sqrt(m.log(n)*m.log(m.log(n)))))) #formula for upper x bound
     print("hi")
     xrng = list(range(s, s + upx))
     vals = [x**2 - n for x in xrng] #generates list of x^2 - n values
